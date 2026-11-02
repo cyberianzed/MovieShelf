@@ -55,6 +55,10 @@ fun MovieShelfApp(services: PlatformServices, backBridge: BackBridge = remember 
     var railHasFocus by remember { mutableStateOf(false) }
     var panelHasFocus by remember { mutableStateOf(false) }
     var contentHasFocus by remember { mutableStateOf(false) }
+    /** Counts key presses, so the focus handoff can tell a slip back to the sidebar from the user going there. */
+    var keyPresses by remember { mutableStateOf(0) }
+    /** The page the focus was last handed to; a new one waits for the crossfade to finish first. */
+    var focusedPage by remember { mutableStateOf(page) }
     var railHovered by remember { mutableStateOf(false) }
     var contentWantsFocus by remember { mutableStateOf(services.isTv) }
     var panelWantsFocus by remember { mutableStateOf(false) }
@@ -157,11 +161,27 @@ fun MovieShelfApp(services: PlatformServices, backBridge: BackBridge = remember 
 
     LaunchedEffect(contentWantsFocus, page) {
         if (!contentWantsFocus) return@LaunchedEffect
+        // Pages crossfade (200 ms) and the old one can take the focus until it's gone, which then drops the focus
+        // back on the sidebar: a new page gets the focus once the fade is over.
+        if (focusedPage != page) { delay(230); focusedPage = page }
         // Up to ~6 s: a page still loading has nothing to focus at first, and giving up left the sidebar open.
         repeat(120) {
             withFrameNanos { }
             try { contentFocus.requestFocus() } catch (_: IllegalStateException) { }
-            if (contentHasFocus) { contentWantsFocus = false; return@LaunchedEffect }
+            if (contentHasFocus) {
+                // Should the focus still slip back to the sidebar on its own (no key pressed) within ~1.5 s, it goes
+                // to the page again. Watched apart, so the next request for the content is never swallowed.
+                val pressed = keyPresses
+                scope.launch {
+                    repeat(30) {
+                        delay(50)
+                        if (keyPresses != pressed) return@launch
+                        if (railHasFocus) try { contentFocus.requestFocus() } catch (_: IllegalStateException) { }
+                    }
+                }
+                contentWantsFocus = false
+                return@LaunchedEffect
+            }
             delay(50)
         }
         contentWantsFocus = false
@@ -206,6 +226,7 @@ fun MovieShelfApp(services: PlatformServices, backBridge: BackBridge = remember 
                 .onPreviewKeyEvent { ev ->
                     if (ev.type != KeyEventType.KeyDown) return@onPreviewKeyEvent false
                     input.keyboard = true
+                    keyPresses++
                     when {
                         ev.key == Key.Escape -> { goBack(); true }
                         ev.key == Key.Menu -> { focusRail(page.menu()); true }
