@@ -1,4 +1,4 @@
-# MovieShelf development notes for Claude Code / coding agents
+# Padampetti (formerly MovieShelf) development notes for Claude Code / coding agents
 
 Goal: one **shared Kotlin Compose Multiplatform** app, targeting Windows desktop and Android/Google TV.
 
@@ -21,4 +21,4 @@ Build: JDK 17+, `local.properties` with `sdk.dir=C:/Users/<you>/AppData/Local/An
 Key source (`composeApp/src/commonMain/kotlin/com/movieshelf/app/`): `App.kt` (state, focus, back), `Sidebar.kt`, `Browse.kt`,
 `Details.kt`, `Pages.kt`, `Components.kt`, `Theme.kt`; data in `Movies.kt` (rules), `Tmdb.kt` (repository), `Feed.kt` (paging), `Prefs.kt`, `Demo.kt`.
 Platform: `androidMain/.../MainActivity.kt`, `desktopMain/.../DesktopMain.kt`; shared JVM code (IMDb file, HTTP) in `src/jvmShared`.
-Never launch the desktop app from the build folder while building: run a copy (`%LOCALAPPDATA%\Programs\MovieShelf`).
+Never launch the desktop app from the build folder while building: run a copy (`%LOCALAPPDATA%\Programs\Padampetti`).

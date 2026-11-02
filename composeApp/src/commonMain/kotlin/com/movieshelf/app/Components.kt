@@ -80,7 +80,7 @@ fun PosterCard(movie: Movie, marks: Marks, onClick: () -> Unit, modifier: Modifi
                 .background(Brush.linearGradient(listOf(Color(0xFF2A3A52), Color(0xFF151B24))))
                 .border(
                     when {
-                        focused -> BorderStroke(3.dp, Palette.Focus)
+                        focused -> BorderStroke(3.dp, Palette.Accent)   // the brand's mint, only on the focused poster
                         movie.isGood -> BorderStroke(2.dp, Palette.Good.copy(alpha = 0.75f))
                         else -> BorderStroke(1.dp, Color.White.copy(alpha = 0.06f))
                     },
@@ -189,7 +189,7 @@ fun RatingChip(movie: Movie, rating: String = movie.rating ?: "", large: Boolean
 @Composable
 fun Tag(text: String, modifier: Modifier = Modifier, color: Color = Palette.Accent) {
     Text(
-        text, color = Color.White, fontSize = 10.sp, fontWeight = FontWeight.Bold,
+        text, color = if (color == Palette.Accent) Palette.OnAccent else Color.White, fontSize = 10.sp, fontWeight = FontWeight.Bold,
         modifier = modifier.background(color.copy(alpha = 0.92f), RoundedCornerShape(6.dp)).padding(horizontal = 7.dp, vertical = 3.dp)
     )
 }
@@ -235,8 +235,9 @@ fun PillButton(
         else -> Palette.Elevated
     }
     val content = when {
-        focused && light -> Color.White
+        focused && light -> Palette.OnAccent
         focused || light -> Palette.Background
+        primary -> Palette.OnAccent
         else -> Palette.Text
     }
     Row(

@@ -25,8 +25,10 @@ object Palette {
     val Text = Color(0xFFF8FAFC)
     val Muted = Color(0xFF94A3B8)
     val Focus = Color(0xFFF1F5F9)
-    val Accent = Color(0xFF2F8CFF)
-    val AccentSoft = Color(0xFF1B3557)
+    /** Padampetti's mint (its logo's TV); text on it is OnAccent, not white. */
+    val Accent = Color(0xFF2DD4BF)
+    val AccentSoft = Color(0xFF123F3B)
+    val OnAccent = Color(0xFF06302B)
     val Star = Color(0xFFFFC94D)
     val Good = Color(0xFF1FA463)
     val GoodText = Color(0xFF7CE3A8)

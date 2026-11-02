@@ -151,7 +151,7 @@ class UiTest {
         onAllNodes(isRoot())[0].performMouseInput { click(androidx.compose.ui.geometry.Offset(1200f, 700f)) }
         waitForIdle()
         onNodeWithText("Press OK to apply").assertDoesNotExist()
-        onNodeWithText("MovieShelf").assertDoesNotExist() // rail label only shows while expanded
+        onNodeWithText("Padampetti").assertDoesNotExist() // rail label only shows while expanded
     }
 
     @Test fun lumioSendToTvOnDesktopOnly() {

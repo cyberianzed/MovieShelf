@@ -104,10 +104,10 @@ fun SideRail(
             .padding(horizontal = 14.dp, vertical = if (dims.tv) 28.dp else 18.dp),
     ) {
         Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.height(48.dp)) {
-            Image(painterResource(Res.drawable.app_logo), "MovieShelf", modifier = Modifier.size(48.dp))
+            Image(painterResource(Res.drawable.app_logo), "Padampetti", modifier = Modifier.size(48.dp))
             if (expanded) {
                 Spacer(Modifier.width(12.dp))
-                Text("MovieShelf", color = Palette.Text, fontWeight = FontWeight.Bold, fontSize = 17.sp, maxLines = 1)
+                Text("Padampetti", color = Palette.Text, fontWeight = FontWeight.Bold, fontSize = 17.sp, maxLines = 1)
             }
         }
         Spacer(Modifier.weight(1f))

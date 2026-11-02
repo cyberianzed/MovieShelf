@@ -32,7 +32,7 @@
     </queries>
 
     <application
-        android:label="MovieShelf"
+        android:label="Padampetti"
         android:theme="@android:style/Theme.Material.NoActionBar"
         android:banner="@drawable/tv_banner"
         android:icon="@mipmap/ic_launcher"

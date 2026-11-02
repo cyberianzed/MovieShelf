@@ -268,7 +268,7 @@ private fun ProviderButton(provider: WatchProvider, modifier: Modifier, onClick:
         Box(
             Modifier.size(68.dp).graphicsLayer { scaleX = scale; scaleY = scale }
                 .clip(RoundedCornerShape(16.dp)).background(Palette.Elevated)
-                .border(BorderStroke(if (focused) 3.dp else 1.dp, if (focused) Palette.Focus else Palette.Line), RoundedCornerShape(16.dp)),
+                .border(BorderStroke(if (focused) 3.dp else 1.dp, if (focused) Palette.Accent else Palette.Line), RoundedCornerShape(16.dp)),
             contentAlignment = Alignment.Center
         ) {
             if (provider.logoUrl != null) AsyncImage(provider.logoUrl, provider.name, contentScale = ContentScale.Crop, modifier = Modifier.fillMaxSize())

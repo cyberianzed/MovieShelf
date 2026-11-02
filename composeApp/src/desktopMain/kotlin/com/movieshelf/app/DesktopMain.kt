@@ -67,7 +67,7 @@ fun main() {
         ) {
         Window(
             onCloseRequest = ::exitApplication,
-            title = "MovieShelf",
+            title = "Padampetti",
             icon = painterResource(Res.drawable.app_logo),
             state = windowState,
             onPreviewKeyEvent = { ev ->

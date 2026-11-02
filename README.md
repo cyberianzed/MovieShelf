@@ -1,10 +1,14 @@
-# MovieShelf: Malayalam movie browser for Google TV, Android TV and Windows
+# Padampetti (പടംപെട്ടി): Malayalam movie browser for Google TV, Android TV and Windows
 
-**MovieShelf** is a free, open-source app for finding **new Malayalam movies** (and optionally Tamil, Telugu, Hindi, Kannada or English films) month by month, checking their **IMDb rating**, watching the **trailer**, and opening the movie straight in the **streaming app that has it**: Netflix, Prime Video, JioHotstar, SonyLIV, ZEE5, Sun NXT, Manorama MAX and more.
+<p align="center"><img src="composeApp/icons/Padampetti-1024.png" alt="Padampetti" width="160"></p>
+
+*Padampetti* is Malayalam for "movie box". The app was called MovieShelf until 1.5.0.
+
+**Padampetti** is a free, open-source app for finding **new Malayalam movies** (and optionally Tamil, Telugu, Hindi, Kannada or English films) month by month, checking their **IMDb rating**, watching the **trailer**, and opening the movie straight in the **streaming app that has it**: Netflix, Prime Video, JioHotstar, SonyLIV, ZEE5, Sun NXT, Manorama MAX and more.
 
 It's one Kotlin Compose Multiplatform codebase that runs on a **Google TV / Android TV** with the remote, and on **Windows** with mouse and keyboard.
 
-> "What new Malayalam movies came out this month, are they any good, and where can I watch them?" Answering that from the sofa in a few clicks is what MovieShelf is for.
+> "What new Malayalam movies came out this month, are they any good, and where can I watch them?" Answering that from the sofa in a few clicks is what Padampetti is for.
 
 ## Use cases
 
@@ -35,29 +39,29 @@ It's one Kotlin Compose Multiplatform codebase that runs on a **Google TV / Andr
 
 1. Create a free account at [themoviedb.org](https://www.themoviedb.org/signup).
 2. Go to Settings → API, request an API key, and copy the **API Read Access Token** (the long one). The short 32-character v3 key also works.
-3. In MovieShelf, open **Settings**, paste it, and choose **Save and use TMDB**. Do this once on each device.
+3. In Padampetti, open **Settings**, paste it, and choose **Save and use TMDB**. Do this once on each device.
 
 Without a key the app runs in demo mode.
 
 ### 2a. Install on Google TV / Android TV
 
-1. Download `MovieShelf.apk` from the [latest release](../../releases/latest), or build it yourself (see below).
+1. Download `Padampetti.apk` from the [latest release](../../releases/latest), or build it yourself (see below).
 2. On the TV: Settings → System → About → press *Android TV OS build* 7 times, then turn on **Developer options → USB debugging / Wireless debugging**.
 3. From a computer with [Android platform-tools](https://developer.android.com/tools/releases/platform-tools):
 
    ```bash
    adb connect <TV-IP>:5555          # or: adb pair <TV-IP>:<port>, then adb connect
-   adb install -r MovieShelf.apk
+   adb install -r Padampetti.apk
    ```
 
    Alternatively, copy the APK to a USB stick and install it with a file manager app on the TV, or use the "Send Files to TV" app.
-4. Open **MovieShelf** from your apps.
+4. Open **Padampetti** from your apps.
 
 Remote: arrows move, OK opens or applies, **Back** opens the sidebar or closes menus, and Up/Down wrap around in lists.
 
 ### 2b. Run on Windows
 
-Build and run it from source (below): `.\gradlew.bat :composeApp:run`, or `:composeApp:createDistributable` for a standalone `MovieShelf.exe` folder.
+Build and run it from source (below): `.\gradlew.bat :composeApp:run`, or `:composeApp:createDistributable` for a standalone `Padampetti.exe` folder.
 
 Keys: arrows move, Enter opens, Esc goes back, **F11** toggles full screen. Mouse wheel scrolls months; Shift + wheel scrolls a row sideways.
 
@@ -87,7 +91,7 @@ Requirements: **JDK 17+**, the **Android SDK** (Platform 35) for the TV build, a
    ./gradlew :composeApp:desktopTest          # logic + UI tests (screenshots in composeApp/build/screenshots)
    ./gradlew :composeApp:assembleDebug        # Android TV APK (debug-signed)
    ./gradlew :composeApp:assembleRelease      # Android TV APK (needs your own signing key, see below)
-   ./gradlew :composeApp:createDistributable  # Windows app folder with MovieShelf.exe
+   ./gradlew :composeApp:createDistributable  # Windows app folder with Padampetti.exe
    ./gradlew :composeApp:packageMsi           # Windows installer (WiX; may need an Administrator shell)
    ```
 
@@ -95,7 +99,7 @@ Requirements: **JDK 17+**, the **Android SDK** (Platform 35) for the TV build, a
 
 **Release signing:** add `release.storeFile`, `release.storePassword`, `release.keyAlias` and `release.keyPassword` to `local.properties`. Without them, `assembleRelease` produces an unsigned APK. Keep the keystore safe: Android only installs updates signed with the same key.
 
-**Security note:** never commit a TMDB token. MovieShelf stores it on the device only (Android SharedPreferences, Windows registry under `HKCU\Software\JavaSoft\Prefs\MovieShelf`).
+**Security note:** never commit a TMDB token. Padampetti stores it on the device only (Android SharedPreferences, Windows registry under `HKCU\Software\JavaSoft\Prefs\MovieShelf`).
 
 ## How it works
 
@@ -136,7 +140,7 @@ Ideas that would help:
 
 **Is it free?** Yes. The app is MIT-licensed and the TMDB key is free for personal use.
 
-**Does it stream movies?** No. MovieShelf helps you find a movie and opens it in an app you already use (Netflix, Prime Video, Nuvio, etc.).
+**Does it stream movies?** No. Padampetti helps you find a movie and opens it in an app you already use (Netflix, Prime Video, Nuvio, etc.).
 
 **Which TVs does it work on?** Any Google TV or Android TV (Android 8+), including Lumio, Sony, TCL, Xiaomi and Chromecast with Google TV. It was developed on a Lumio Vision Google TV.
 

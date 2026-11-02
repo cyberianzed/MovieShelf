@@ -71,8 +71,8 @@ android {
         applicationId = "com.movieshelf.app"
         minSdk = 26
         targetSdk = 35
-        versionCode = 3
-        versionName = "1.0.0"
+        versionCode = 4
+        versionName = "1.5.0"
     }
     signingConfigs {
         localProps.getProperty("release.storeFile")?.let { path ->
@@ -109,9 +109,9 @@ compose.desktop {
         mainClass = "com.movieshelf.app.DesktopMainKt"
         nativeDistributions {
             targetFormats(TargetFormat.Msi)
-            packageName = "MovieShelf"
+            packageName = "Padampetti"
             // MSI requires MAJOR > 0.
-            packageVersion = "1.0.0"
+            packageVersion = "1.5.0"
             // java.prefs: saved settings; jdk.crypto.ec: modern TLS to TMDB in the bundled runtime.
             modules("java.prefs", "java.net.http", "jdk.crypto.ec", "jdk.unsupported")
             windows {
@@ -119,8 +119,8 @@ compose.desktop {
                 shortcut = true
                 dirChooser = true
                 perUserInstall = true
-                menuGroup = "MovieShelf"
-                iconFile.set(project.file("icons/MovieShelf.ico"))
+                menuGroup = "Padampetti"
+                iconFile.set(project.file("icons/Padampetti.ico"))
                 upgradeUuid = "5B7C9E2A-4F1D-4C8B-9A3E-6D2F1B8C7A41"
             }
             description = "Malayalam movie discovery for desktop and Google TV"
