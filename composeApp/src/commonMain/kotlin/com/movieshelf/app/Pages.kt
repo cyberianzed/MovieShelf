@@ -19,6 +19,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
+import androidx.compose.ui.input.key.key
+import androidx.compose.ui.input.key.onPreviewKeyEvent
+import androidx.compose.ui.input.key.type
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
@@ -255,13 +258,13 @@ fun SettingsPage(
 
 @Composable
 private fun KeyField(value: String, onChange: (String) -> Unit, label: String) {
-    // Ready to type at once: a mouse pointer resting on it puts the cursor in it, and the remote's focus opens the
-    // TV's keyboard (no extra OK press first).
+    // A mouse pointer resting on it puts the cursor in it (ready to type). With the remote, OK opens the keyboard:
+    // the focus passing over it doesn't.
     val focus = remember { FocusRequester() }
     val hover = remember { androidx.compose.foundation.interaction.MutableInteractionSource() }
     val hovered by hover.collectIsHoveredAsState()
-    val keyboard = androidx.compose.ui.platform.LocalSoftwareKeyboardController.current
     LaunchedEffect(hovered) { if (hovered) try { focus.requestFocus() } catch (_: IllegalStateException) { } }
+    val keyboard = androidx.compose.ui.platform.LocalSoftwareKeyboardController.current
     OutlinedTextField(
         value = value, onValueChange = onChange, singleLine = true,
         visualTransformation = PasswordVisualTransformation(),
@@ -269,7 +272,12 @@ private fun KeyField(value: String, onChange: (String) -> Unit, label: String) {
         modifier = Modifier.widthIn(max = 640.dp).fillMaxWidth()
             .focusRequester(focus)
             .hoverable(hover)
-            .onFocusChanged { if (it.isFocused) keyboard?.show() },
+            .onFocusChanged { if (it.isFocused) keyboard?.hide() }   // passing over it: no keyboard
+            .onPreviewKeyEvent { ev ->   // OK on it: the keyboard
+                if (ev.type == androidx.compose.ui.input.key.KeyEventType.KeyUp &&
+                    (ev.key == androidx.compose.ui.input.key.Key.DirectionCenter || ev.key == androidx.compose.ui.input.key.Key.Enter)
+                ) { keyboard?.show(); true } else false
+            },
         colors = fieldColors()
     )
 }
