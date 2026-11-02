@@ -222,20 +222,6 @@ class RepositoryTest {
         assertNull(d.providers.single().directUrl)
     }
 
-    @Test fun lumioSendLinkCleansDigitsAndEncodesTitles() {
-        assertEquals("919876543210", lumioDigits("+91 98765-43210"))
-        assertEquals("https://wa.me/919876543210?text=play%20Manjummel%20Boys%202024", lumioSendLink("+91 98765 43210", "Manjummel Boys", "2024"))
-        // '&' must not end the text parameter; spaces are %20 (a '+' would show up literally in WhatsApp).
-        assertEquals("https://wa.me/91123?text=play%20Tom%20%26%20Jerry%202021", lumioSendLink("91123", "Tom & Jerry", "2021"))
-        // Malayalam titles are sent as UTF-8 percent-encoding: "ആവേശം" (Aavesham).
-        assertEquals(
-            "https://wa.me/91123?text=play%20%E0%B4%86%E0%B4%B5%E0%B5%87%E0%B4%B6%E0%B4%82",
-            lumioSendLink("91123", "ആവേശം", "")
-        )
-        assertNull(lumioSendLink("", "Premam", "2015"))
-        assertNull(lumioSendLink("+ -", "Premam", "2015"))
-    }
-
     @Test fun picksTheOfficialTrailer() {
         val videos = listOf(
             VideoDto("bts", "YouTube", "Behind the Scenes", true, "en"),

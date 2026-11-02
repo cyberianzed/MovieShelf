@@ -1,5 +1,7 @@
 package com.movieshelf.app
 
+import androidx.compose.foundation.hoverable
+import androidx.compose.foundation.interaction.collectIsHoveredAsState
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.LazyGridState
 import androidx.compose.foundation.rememberScrollState
@@ -12,9 +14,11 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
@@ -42,6 +46,8 @@ fun SearchPage(
     onFocusTaken: () -> Unit,
     marks: Marks,
     onMovie: (Movie) -> Unit,
+    /** Voice search, where the device has it (null: no mic button). */
+    onVoice: (() -> Unit)? = null,
 ) {
     val fieldFocus = remember { FocusRequester() }
     LaunchedEffect(wantsFocus) {
@@ -66,14 +72,20 @@ fun SearchPage(
         Column(Modifier.padding(top = 26.dp, bottom = 8.dp)) {
             Text("Search", color = Palette.Text, fontSize = 28.sp, fontWeight = FontWeight.Bold)
             Spacer(Modifier.height(14.dp))
-            OutlinedTextField(
-                value = query, onValueChange = onQuery, singleLine = true,
-                placeholder = { Text("Movie title, e.g. Aavesham") },
-                leadingIcon = { Icon(Icons.Default.Search, null) },
-                shape = RoundedCornerShape(16.dp),
-                modifier = Modifier.widthIn(max = 640.dp).fillMaxWidth().focusRequester(fieldFocus),
-                colors = fieldColors()
-            )
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                OutlinedTextField(
+                    value = query, onValueChange = onQuery, singleLine = true,
+                    placeholder = { Text("Movie title, e.g. Aavesham") },
+                    leadingIcon = { Icon(Icons.Default.Search, null) },
+                    shape = RoundedCornerShape(16.dp),
+                    modifier = Modifier.widthIn(max = 640.dp).weight(1f, fill = false).focusRequester(fieldFocus),
+                    colors = fieldColors()
+                )
+                if (onVoice != null) {
+                    Spacer(Modifier.width(12.dp))
+                    PillButton("Speak", icon = MicIcon, onClick = onVoice)
+                }
+            }
             Spacer(Modifier.height(18.dp))
             Text(
                 if (settled.length < 2) "Popular movies" else "Results for \"$settled\"",
@@ -84,11 +96,16 @@ fun SearchPage(
 }
 
 @Composable
-fun WatchlistPage(movies: List<Movie>, marks: Marks, onMovie: (Movie) -> Unit) {
+fun WatchlistPage(movies: List<Movie>, marks: Marks, onMovie: (Movie) -> Unit, onBrowse: () -> Unit) {
     StaticGrid(movies.reversed(), marks, onMovie) {
         Column {
             PageHeader("Watchlist", "${movies.size} saved on this device")
-            if (movies.isEmpty()) Text("Nothing saved yet. Open a movie and choose Add to watchlist.", color = Palette.Muted, fontSize = 15.sp)
+            if (movies.isEmpty()) {
+                Text("Nothing saved yet. Open a movie and choose Add to watchlist.", color = Palette.Muted, fontSize = 15.sp)
+                Spacer(Modifier.height(16.dp))
+                // Something to focus: with no posters, the remote had nowhere to go and the sidebar stayed open.
+                PillButton("Browse movies", primary = true, onClick = onBrowse)
+            }
         }
     }
 }
@@ -198,26 +215,6 @@ fun SettingsPage(
         saved?.let { Text(it, color = Palette.Accent, fontSize = 13.sp, modifier = Modifier.padding(top = 8.dp)) }
 
         Spacer(Modifier.height(30.dp))
-        SettingsTitle("Send to Lumio TV (Project Neo beta)")
-        Text(
-            "Optional. Register at neo.lumiolabs.ai to get Neo's WhatsApp number. Movie pages on this computer or phone " +
-                "then get a Send to TV button that opens WhatsApp with \"play <title> <year>\" ready to send.",
-            color = Palette.Muted, fontSize = 13.sp
-        )
-        Spacer(Modifier.height(10.dp))
-        var lumioDraft by remember(options.lumioNumber) { mutableStateOf(options.lumioNumber) }
-        OutlinedTextField(
-            value = lumioDraft, onValueChange = { lumioDraft = lumioDigits(it); saved = null }, singleLine = true,
-            label = { Text("Lumio Neo WhatsApp number (country code, digits only)") }, shape = RoundedCornerShape(14.dp),
-            modifier = Modifier.widthIn(max = 640.dp).fillMaxWidth(), colors = fieldColors()
-        )
-        Spacer(Modifier.height(12.dp))
-        Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-            PillButton("Save number", primary = true) { onOptions(options.copy(lumioNumber = lumioDraft)); saved = "Lumio number saved." }
-            if (options.lumioNumber.isNotBlank()) PillButton("Remove") { lumioDraft = ""; onOptions(options.copy(lumioNumber = "")); saved = "Lumio number removed." }
-        }
-
-        Spacer(Modifier.height(30.dp))
         SettingsTitle("Top rated sort: minimum votes")
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             listOf(0, 3, 5, 10, 25, 50, 100).forEach { value ->
@@ -256,11 +253,22 @@ fun SettingsPage(
 
 @Composable
 private fun KeyField(value: String, onChange: (String) -> Unit, label: String) {
+    // Ready to type at once: a mouse pointer resting on it puts the cursor in it, and the remote's focus opens the
+    // TV's keyboard (no extra OK press first).
+    val focus = remember { FocusRequester() }
+    val hover = remember { androidx.compose.foundation.interaction.MutableInteractionSource() }
+    val hovered by hover.collectIsHoveredAsState()
+    val keyboard = androidx.compose.ui.platform.LocalSoftwareKeyboardController.current
+    LaunchedEffect(hovered) { if (hovered) try { focus.requestFocus() } catch (_: IllegalStateException) { } }
     OutlinedTextField(
         value = value, onValueChange = onChange, singleLine = true,
         visualTransformation = PasswordVisualTransformation(),
         label = { Text(label) }, shape = RoundedCornerShape(14.dp),
-        modifier = Modifier.widthIn(max = 640.dp).fillMaxWidth(), colors = fieldColors()
+        modifier = Modifier.widthIn(max = 640.dp).fillMaxWidth()
+            .focusRequester(focus)
+            .hoverable(hover)
+            .onFocusChanged { if (it.isFocused) keyboard?.show() },
+        colors = fieldColors()
     )
 }
 

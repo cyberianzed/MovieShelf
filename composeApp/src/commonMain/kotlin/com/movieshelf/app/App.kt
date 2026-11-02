@@ -164,6 +164,8 @@ fun MovieShelfApp(services: PlatformServices, backBridge: BackBridge = remember 
             delay(50)
         }
         contentWantsFocus = false
+        // A page with nothing to focus would leave the sidebar open with Back doing nothing: go Home instead.
+        if (page != Page.BROWSE && input.keyboard) { page = Page.BROWSE; contentWantsFocus = true }
     }
 
     LaunchedEffect(chipWantsFocus) {
@@ -300,9 +302,10 @@ fun MovieShelfApp(services: PlatformServices, backBridge: BackBridge = remember 
                         Page.SEARCH -> SearchPage(
                             options, repository, query, onQuery = { query = it },
                             wantsFocus = searchWantsFocus, onFocusTaken = { searchWantsFocus = false },
-                            marks = marks, onMovie = { selected = it }
+                            marks = marks, onMovie = { selected = it },
+                            onVoice = if (services.voiceAvailable) { { services.voiceSearch { spoken -> query = spoken } } } else null
                         )
-                        Page.WATCHLIST -> WatchlistPage(watchlist, marks, onMovie = { selected = it })
+                        Page.WATCHLIST -> WatchlistPage(watchlist, marks, onMovie = { selected = it }, onBrowse = { navigate(Page.BROWSE) })
                         Page.SETTINGS -> SettingsPage(
                             options = options, nuvioAvailable = services.nuvioAvailable, omdbStatus = repository.omdbStatus,
                             onRefreshRatings = { repository.refreshRatings(); refreshTick++ },
@@ -310,7 +313,6 @@ fun MovieShelfApp(services: PlatformServices, backBridge: BackBridge = remember 
                                 prefs.token = new.token; prefs.omdbKey = new.omdbKey; prefs.languages = new.languages
                                 prefs.minVotes = new.minVotes; prefs.minRating = new.minRating; prefs.showUnrated = new.showUnrated
                                 prefs.betterPosters = new.betterPosters
-                                prefs.lumioNumber = new.lumioNumber
                                 prefs.nuvio = new.nuvio
                                 options = prefs.options()
                             }

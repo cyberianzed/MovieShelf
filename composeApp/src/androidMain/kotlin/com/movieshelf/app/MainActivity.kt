@@ -11,6 +11,8 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
+import androidx.activity.result.contract.ActivityResultContracts
+import android.speech.RecognizerIntent
 import androidx.compose.runtime.remember
 import coil3.ImageLoader
 import coil3.SingletonImageLoader
@@ -28,6 +30,24 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         val services = AndroidServices(applicationContext)
+        // Voice search: Google's voice input (on a TV it's the Assistant's listener) hands back what was said.
+        var heard: ((String) -> Unit)? = null
+        val listen = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+            val text = result.data?.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS)?.firstOrNull()
+            if (!text.isNullOrBlank()) heard?.invoke(text)
+            heard = null
+        }
+        services.listen = { onText ->
+            heard = onText
+            try {
+                listen.launch(
+                    Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH)
+                        .putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_WEB_SEARCH)
+                        .putExtra(RecognizerIntent.EXTRA_PROMPT, "Say a movie title")
+                )
+                true
+            } catch (_: ActivityNotFoundException) { heard = null; false }
+        }
         SingletonImageLoader.setSafe { context ->
             ImageLoader.Builder(context)
                 .diskCache { DiskCache.Builder().directory(context.cacheDir.resolve("image_cache").toOkioPath()).maxSizeBytes(250L * 1024 * 1024).build() }
@@ -47,6 +67,15 @@ private class AndroidServices(private val context: Context) : PlatformServices {
         (context.getSystemService(Context.UI_MODE_SERVICE) as UiModeManager).currentModeType == Configuration.UI_MODE_TYPE_TELEVISION ||
             context.packageManager.hasSystemFeature(PackageManager.FEATURE_LEANBACK)
     private val prefs = context.getSharedPreferences("movie_shelf", Context.MODE_PRIVATE)
+
+    /** Set by MainActivity, which owns the activity-result launcher. */
+    var listen: ((String) -> Unit) -> Boolean = { false }
+
+    override val voiceAvailable: Boolean by lazy {
+        context.packageManager.queryIntentActivities(Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH), 0).isNotEmpty()
+    }
+
+    override fun voiceSearch(onText: (String) -> Unit): Boolean = listen(onText)
 
     override val nuvioAvailable: Boolean by lazy {
         context.packageManager.queryIntentActivities(Intent(Intent.ACTION_VIEW, Uri.parse("nuvio://tmdb/movie/1")), 0).isNotEmpty()

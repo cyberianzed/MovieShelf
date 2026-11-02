@@ -46,6 +46,10 @@ interface PlatformServices {
     val trailerPlayer: TrailerPlayer? get() = null
     /** The Trailer button: plays it with sound (YouTube app on Android/TV, a clean Edge window on Windows). */
     fun openTrailer(youtubeKey: String): Boolean = openWeb("https://www.youtube.com/watch?v=$youtubeKey")
+    /** True when the device can turn speech into text for search (Google's voice input on a TV or phone). */
+    val voiceAvailable: Boolean get() = false
+    /** Listens once and hands back what was said; false when there's no voice input here. */
+    fun voiceSearch(onText: (String) -> Unit): Boolean = false
     /** IMDb rating + votes from IMDb's own daily ratings file, for the ids it knows. */
     suspend fun imdbRatings(imdbIds: Collection<String>): Map<String, Pair<Double, Int>>
 }

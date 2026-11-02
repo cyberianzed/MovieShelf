@@ -154,28 +154,6 @@ class UiTest {
         onNodeWithText("Padampetti").assertDoesNotExist() // rail label only shows while expanded
     }
 
-    @Test fun lumioSendToTvOnDesktopOnly() {
-        runDesktopComposeUiTest(1440, 900) {
-            val services = FakeServices().apply { settings["lumio_number"] = "919876543210" }
-            setContent { MovieShelfApp(services) }
-            waitUntil(timeoutMillis = 5000) { onAllNodesWithText("View Details").fetchSemanticsNodes().isNotEmpty() }
-            onAllNodesWithText("View Details")[0].performClick()
-            waitUntil(timeoutMillis = 5000) { onAllNodesWithText("Send to TV").fetchSemanticsNodes().isNotEmpty() }
-            onNodeWithText("Send to TV").performClick()
-            assertEquals(true, services.opened.last().startsWith("https://wa.me/919876543210?text=play%20"))
-            onNodeWithText("Send to TV with your phone").assertDoesNotExist()
-        }
-        runDesktopComposeUiTest(960, 540) {
-            val services = FakeServices(isTv = true).apply { settings["lumio_number"] = "919876543210" }
-            setContent { MovieShelfApp(services) }
-            waitUntil(timeoutMillis = 5000) { onAllNodesWithText("View Details").fetchSemanticsNodes().isNotEmpty() }
-            onAllNodesWithText("View Details")[0].performClick()
-            waitUntil(timeoutMillis = 5000) { onAllNodesWithText("WATCH NOW").fetchSemanticsNodes().isNotEmpty() }
-            onNodeWithText("Send to TV").assertDoesNotExist() // nothing Lumio/TLDR on the TV itself
-            onNodeWithText("Send to TV with your phone").assertDoesNotExist()
-        }
-    }
-
     @Test fun trailerButtonOpensTheTrailer() = runDesktopComposeUiTest(1440, 900) {
         val body = """{"id":5,"title":"Minnal Murali","videos":{"results":[{"key":"zAUAliz1TKA","site":"YouTube","type":"Trailer","official":true,"iso_639_1":"ml"}]}}"""
         val services = FakeServices({ url -> if ("/movie/5?" in url) body else pageJson(1, 1) })

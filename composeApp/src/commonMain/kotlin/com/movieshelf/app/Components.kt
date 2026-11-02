@@ -226,7 +226,7 @@ fun PillButton(
 ) {
     val (interaction, focused, hovered) = rememberCardInteraction()
     val background = when {
-        focused && light -> Palette.Accent
+        focused && light -> Palette.LightFocus
         focused -> Palette.Focus
         light -> Color.White
         primary -> Palette.Accent
@@ -235,7 +235,7 @@ fun PillButton(
         else -> Palette.Elevated
     }
     val content = when {
-        focused && light -> Palette.OnAccent
+        focused && light -> Color.White
         focused || light -> Palette.Background
         primary -> Palette.OnAccent
         else -> Palette.Text
@@ -302,4 +302,17 @@ fun SortIcon(tint: Color, size: Dp = 22.dp, description: String? = null) {
             )
         }
     }
+}
+
+/** A microphone (Material's shape; the bundled core icons don't include one). */
+val MicIcon: androidx.compose.ui.graphics.vector.ImageVector by lazy {
+    androidx.compose.ui.graphics.vector.ImageVector.Builder("Mic", 24.dp, 24.dp, 24f, 24f).apply {
+        addPath(
+            androidx.compose.ui.graphics.vector.PathParser().parsePathString(
+                "M12,14c1.66,0 3,-1.34 3,-3V5c0,-1.66 -1.34,-3 -3,-3S9,3.34 9,5v6c0,1.66 1.34,3 3,3z" +
+                    "M17,11c0,2.76 -2.24,5 -5,5s-5,-2.24 -5,-5H5c0,3.53 2.61,6.43 6,6.92V21h2v-3.08c3.39,-0.49 6,-3.39 6,-6.92h-2z"
+            ).toNodes(),
+            fill = androidx.compose.ui.graphics.SolidColor(Color.Black)
+        )
+    }.build()
 }

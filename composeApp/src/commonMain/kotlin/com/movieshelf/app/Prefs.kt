@@ -63,16 +63,11 @@ class Prefs(private val services: PlatformServices) {
         get() = services.readSetting("better_posters") != "false"
         set(value) = services.saveSetting("better_posters", value.toString())
 
-    /** Stored locally like the TMDB token; digits only. */
-    var lumioNumber: String
-        get() = lumioDigits(services.readSetting("lumio_number"))
-        set(value) = services.saveSetting("lumio_number", lumioDigits(value))
-
     var nuvio: Boolean
         get() = services.readSetting("nuvio") != "false"
         set(value) = services.saveSetting("nuvio", value.toString())
 
-    fun options() = Options(token, omdbKey, languages, minVotes, minRating, showUnrated, betterPosters, lumioNumber, nuvio)
+    fun options() = Options(token, omdbKey, languages, minVotes, minRating, showUnrated, betterPosters, nuvio)
 
     fun loadWatched(): Set<Int> = services.readSetting("watched").split(',').mapNotNull { it.trim().toIntOrNull() }.toSet()
     fun saveWatched(ids: Set<Int>) = services.saveSetting("watched", ids.joinToString(","))

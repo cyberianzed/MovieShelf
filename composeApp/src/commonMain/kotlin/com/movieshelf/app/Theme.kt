@@ -29,6 +29,8 @@ object Palette {
     val Accent = Color(0xFF2DD4BF)
     val AccentSoft = Color(0xFF123F3B)
     val OnAccent = Color(0xFF06302B)
+    /** The white "View Details" button when focused: the blue it always had, white text on it. */
+    val LightFocus = Color(0xFF2F8CFF)
     val Star = Color(0xFFFFC94D)
     val Good = Color(0xFF1FA463)
     val GoodText = Color(0xFF7CE3A8)

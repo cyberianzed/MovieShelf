@@ -17,7 +17,6 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.PlayArrow
-import androidx.compose.material.icons.filled.Send
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
@@ -237,12 +236,6 @@ fun DetailsDialog(
                                 if (!services.openTrailer(trailerKey)) notice = "Couldn't open the trailer on this device."
                             }
                             PillButton(if (watched) "Watched" else "Mark watched", icon = Icons.Default.CheckCircle, selected = watched) { onToggleWatched(shown) }
-                            // Lumio Project Neo: opens WhatsApp (Desktop/Web, linked to the phone) with "play <title> <year>";
-                            // the user presses Send. Not shown on the TV.
-                            val lumio = if (services.isTv) null else lumioSendLink(options.lumioNumber, shown.title, shown.year)
-                            if (lumio != null) PillButton("Send to TV", icon = Icons.Default.Send) {
-                                if (!services.openWeb(lumio)) notice = "Couldn't open WhatsApp on this device."
-                            }
                         }
                         notice?.let { Text(it, color = Palette.Error, fontSize = 13.sp, modifier = Modifier.padding(top = 10.dp)) }
                         if (d != null && d.providers.isNotEmpty()) {

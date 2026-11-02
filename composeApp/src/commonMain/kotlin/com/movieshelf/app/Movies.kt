@@ -78,8 +78,6 @@ data class Options(
     val showUnrated: Boolean = false,
     /** Use Better Posters (btttr.cc) artwork, which needs each film's IMDb id. */
     val betterPosters: Boolean = false,
-    /** Lumio Project Neo's WhatsApp number (digits only, country code first); blank hides "Send to TV". */
-    val lumioNumber: String = "",
     /** Show "Open in Nuvio" on movie pages when Nuvio is installed. */
     val nuvio: Boolean = true,
 ) {
@@ -287,30 +285,4 @@ fun providerLink(providerName: String, title: String, fallback: String, encode: 
         "zee5" in name -> "https://www.zee5.com/search?q=$q"
         else -> fallback
     }
-}
-
-// ---- Lumio Project Neo (beta): "play <title>" on WhatsApp opens the title on a Lumio TV ----
-
-/** Keeps only digits, so "+91 98765-43210" becomes "919876543210" (the form wa.me expects). */
-fun lumioDigits(raw: String): String = raw.filter { it in '0'..'9' }
-
-/** RFC 3986 percent-encoding of UTF-8 (spaces become %20, not '+', which WhatsApp would show literally). */
-fun percentEncode(text: String): String = buildString {
-    text.encodeToByteArray().forEach { b ->
-        val c = b.toInt() and 0xFF
-        val ch = c.toChar()
-        if (ch in 'A'..'Z' || ch in 'a'..'z' || ch in '0'..'9' || ch in "-_.~") append(ch)
-        else { append('%'); append("0123456789ABCDEF"[c shr 4]); append("0123456789ABCDEF"[c and 15]) }
-    }
-}
-
-/**
- * WhatsApp link that pre-fills "play <title> <year>" to Lumio's Neo. The year helps Neo tell remakes apart.
- * The user still presses Send in WhatsApp; nothing is sent automatically. Null when no number is set.
- */
-fun lumioSendLink(number: String, title: String, year: String): String? {
-    val digits = lumioDigits(number)
-    if (digits.isEmpty()) return null
-    val message = listOf("play", title.trim(), year.trim()).filter { it.isNotEmpty() }.joinToString(" ")
-    return "https://wa.me/$digits?text=${percentEncode(message)}"
 }
