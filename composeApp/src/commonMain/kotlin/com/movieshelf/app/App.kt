@@ -164,6 +164,7 @@ fun MovieShelfApp(services: PlatformServices, backBridge: BackBridge = remember 
         // Pages crossfade (200 ms) and the old one can take the focus until it's gone, which then drops the focus
         // back on the sidebar: a new page gets the focus once the fade is over.
         if (focusedPage != page) { delay(230); focusedPage = page }
+        val pressedAtStart = keyPresses
         // Up to ~6 s: a page still loading has nothing to focus at first, and giving up left the sidebar open.
         repeat(120) {
             withFrameNanos { }
@@ -175,7 +176,7 @@ fun MovieShelfApp(services: PlatformServices, backBridge: BackBridge = remember 
                 scope.launch {
                     repeat(30) {
                         delay(50)
-                        if (keyPresses != pressed) return@launch
+                        if (keyPresses != pressed || !input.keyboard) return@launch   // a key or a mouse took over
                         if (railHasFocus) try { contentFocus.requestFocus() } catch (_: IllegalStateException) { }
                     }
                 }
@@ -186,7 +187,8 @@ fun MovieShelfApp(services: PlatformServices, backBridge: BackBridge = remember 
         }
         contentWantsFocus = false
         // A page with nothing to focus would leave the sidebar open with Back doing nothing: go Home instead.
-        if (page != Page.BROWSE && input.keyboard) { page = Page.BROWSE; contentWantsFocus = true }
+        // ...unless the user is busy elsewhere (moving in the sidebar meanwhile).
+        if (page != Page.BROWSE && input.keyboard && keyPresses == pressedAtStart) { page = Page.BROWSE; contentWantsFocus = true }
     }
 
     LaunchedEffect(chipWantsFocus) {

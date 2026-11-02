@@ -1,4 +1,4 @@
-# Draws Padampetti's icons (the mint TV on a blue gradient) into the app's resources:
+﻿# Draws Padampetti's icons (the mint TV on a dark navy gradient, like Nuvio's) into the app's resources:
 # Android launcher icons, the TV banner, the in-app logo, and the Windows .ico. Run from the repo root:
 #   powershell -ExecutionPolicy Bypass -File tools\make-icons.ps1
 Add-Type -AssemblyName System.Drawing
@@ -6,7 +6,8 @@ $root = Split-Path -Parent $PSScriptRoot
 $app = Join-Path $root "composeApp"
 
 function Hex($h) { [System.Drawing.Color]::FromArgb(255, [Convert]::ToInt32($h.Substring(0,2),16), [Convert]::ToInt32($h.Substring(2,2),16), [Convert]::ToInt32($h.Substring(4,2),16)) }
-$blueTop = Hex "2563EB"; $blueBottom = Hex "173D92"
+# The background, like Nuvio's: deep navy fading to near black, with a soft indigo glow at the top left
+$navy = Hex "1C1E3F"; $night = Hex "0B0C1C"; $indigo = Hex "3A2C7A"
 $mintTop = Hex "6EE7D2"; $mintBottom = Hex "14B8A6"; $ink = Hex "141830"
 
 function RoundRect($x, $y, $w, $h, $r) {
@@ -37,6 +38,19 @@ function DrawMark($g, $ox, $oy, $k) {
     $g.FillPath($mint, (RoundRect ($bx+$bw-114*$k) ($by+$bh-6*$k) (56*$k) (30*$k) (12*$k)))
 }
 
+# Paints the background into $shape (a path) over a $w x $h box at the origin
+function Backdrop($g, $shape, $w, $h) {
+    $p1 = New-Object System.Drawing.Point 0, 0
+    $p2 = New-Object System.Drawing.Point $w, $h
+    $g.FillPath((New-Object System.Drawing.Drawing2D.LinearGradientBrush $p1, $p2, $navy, $night), $shape)
+    $glow = New-Object System.Drawing.Drawing2D.GraphicsPath
+    $glow.AddEllipse((-0.16 * $w), (-0.6 * $h), (0.81 * $w), (1.55 * $h))
+    $pg = New-Object System.Drawing.Drawing2D.PathGradientBrush $glow
+    $pg.CenterColor = [System.Drawing.Color]::FromArgb(110, $indigo)
+    $pg.SurroundColors = @([System.Drawing.Color]::FromArgb(0, $indigo))
+    $g.SetClip($shape); $g.FillPath($pg, $glow); $g.ResetClip()
+}
+
 function NewCanvas($w, $h) {
     $b = New-Object System.Drawing.Bitmap $w, $h, ([System.Drawing.Imaging.PixelFormat]::Format32bppArgb)
     $g = [System.Drawing.Graphics]::FromImage($b)
@@ -48,8 +62,9 @@ function NewCanvas($w, $h) {
 # The app icon: the mark on the blue gradient, as a rounded square (or a circle for the round icon)
 function Icon($size, $round) {
     $c = NewCanvas $size $size; $b = $c[0]; $g = $c[1]
-    $bg = New-Object System.Drawing.Drawing2D.LinearGradientBrush (New-Object System.Drawing.Point 0, 0), (New-Object System.Drawing.Point 0, $size), $blueTop, $blueBottom
-    if ($round) { $g.FillEllipse($bg, 0, 0, $size, $size) } else { $g.FillPath($bg, (RoundRect 0 0 $size $size ($size*0.22))) }
+    if ($round) { $shape = New-Object System.Drawing.Drawing2D.GraphicsPath; $shape.AddEllipse(0, 0, $size, $size) }
+    else { $shape = RoundRect 0 0 $size $size ($size*0.22) }
+    Backdrop $g $shape $size $size
     $k = $size * ($(if ($round) { 0.56 } else { 0.62 })) / 400
     DrawMark $g (($size - 330*$k)/2) (($size - 400*$k)/2 + 6*$k) $k
     $g.Dispose(); return $b
@@ -72,8 +87,8 @@ function Banner($w, $h) {
     $g.Dispose()
     $lw0 = [int]($tx + $wordW + 20)
     $c2 = NewCanvas $w $h; $b = $c2[0]; $bg2 = $c2[1]
-    $bg = New-Object System.Drawing.Drawing2D.LinearGradientBrush (New-Object System.Drawing.Point 0, 0), (New-Object System.Drawing.Point 0, $h), $blueTop, $blueBottom
-    $bg2.FillRectangle($bg, 0, 0, $w, $h)
+    $full = New-Object System.Drawing.Drawing2D.GraphicsPath; $full.AddRectangle((New-Object System.Drawing.Rectangle 0, 0, $w, $h))
+    Backdrop $bg2 $full $w $h
     $s = [Math]::Min($w*0.78/$lw0, $h*0.5/400)
     $dest = New-Object System.Drawing.RectangleF ([float](($w-$lw0*$s)/2)), ([float](($h-400*$s)/2)), ([float]($lw0*$s)), ([float](400*$s))
     $srcRect = New-Object System.Drawing.RectangleF 0, 0, $lw0, 400

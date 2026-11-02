@@ -6,6 +6,13 @@
 
     <!-- Android 11+ package visibility: detect Nuvio and streaming apps for the provider buttons. -->
     <queries>
+        <!-- Voice search: without these, Android 11+ hides the speech apps and the mic button never shows. -->
+        <intent>
+            <action android:name="android.speech.action.RECOGNIZE_SPEECH" />
+        </intent>
+        <package android:name="com.google.android.tts" />
+        <package android:name="com.google.android.katniss" />
+        <package android:name="com.google.android.googlequicksearchbox" />
         <intent>
             <action android:name="android.intent.action.VIEW" />
             <data android:scheme="nuvio" />
