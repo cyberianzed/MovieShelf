@@ -2,7 +2,7 @@
 
 <p align="center"><img src="composeApp/icons/Padampetti-1024.png" alt="Padampetti" width="160"></p>
 
-*Padampetti* is Malayalam for "movie box". The app was called MovieShelf until 1.5.0.
+*Padampetti* is Malayalam for "movie box". The app was called MovieShelf until Padampetti 1.0.
 
 **Padampetti** is a free, open-source app for finding **new Malayalam movies** (and optionally Tamil, Telugu, Hindi, Kannada or English films) month by month, checking their **IMDb rating**, watching the **trailer**, and opening the movie straight in the **streaming app that has it**: Netflix, Prime Video, JioHotstar, SonyLIV, ZEE5, Sun NXT, Manorama MAX and more.
 

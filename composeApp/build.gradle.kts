@@ -72,7 +72,7 @@ android {
         minSdk = 26
         targetSdk = 35
         versionCode = 4
-        versionName = "1.5.0"
+        versionName = "1.0.0"
     }
     signingConfigs {
         localProps.getProperty("release.storeFile")?.let { path ->
@@ -111,7 +111,7 @@ compose.desktop {
             targetFormats(TargetFormat.Msi)
             packageName = "Padampetti"
             // MSI requires MAJOR > 0.
-            packageVersion = "1.5.0"
+            packageVersion = "1.0.0"
             // java.prefs: saved settings; jdk.crypto.ec: modern TLS to TMDB in the bundled runtime.
             modules("java.prefs", "java.net.http", "jdk.crypto.ec", "jdk.unsupported")
             windows {

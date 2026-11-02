@@ -1,6 +1,6 @@
 # Changelog
 
-## 1.5.0 (2026-11-02)
+## Padampetti 1.0.0 (2026-11-03), formerly MovieShelf 1.4.1
 
 - **MovieShelf is now Padampetti** (പടംപെട്ടി, "movie box"): the name on the TV, in the Windows window and Start menu, and the installer.
 - **New logo:** a retro TV with a play button, in mint on a blue gradient: Android/TV launcher icons, the TV banner, the in-app logo and the Windows icon (`composeApp/icons/Padampetti.ico`, drawn by `tools/make-icons.ps1`).
