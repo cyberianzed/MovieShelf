@@ -50,8 +50,10 @@ fun SearchPage(
     onVoice: (() -> Unit)? = null,
 ) {
     val fieldFocus = remember { FocusRequester() }
+    val micFocus = remember { FocusRequester() }
     LaunchedEffect(wantsFocus) {
-        if (wantsFocus) { withFrameNanos { }; try { fieldFocus.requestFocus() } catch (_: IllegalStateException) { }; onFocusTaken() }
+        // The mic first, where there is one: OK and speak. Right reaches the box for typing.
+        if (wantsFocus) { withFrameNanos { }; try { (if (onVoice != null) micFocus else fieldFocus).requestFocus() } catch (_: IllegalStateException) { }; onFocusTaken() }
     }
     var settled by remember { mutableStateOf(query.trim()) }
     LaunchedEffect(query) { delay(450); settled = query.trim() }
@@ -73,6 +75,10 @@ fun SearchPage(
             Text("Search", color = Palette.Text, fontSize = 28.sp, fontWeight = FontWeight.Bold)
             Spacer(Modifier.height(14.dp))
             Row(verticalAlignment = Alignment.CenterVertically) {
+                if (onVoice != null) {
+                    PillButton("", icon = MicIcon, description = "Search by voice", modifier = Modifier.focusRequester(micFocus), onClick = onVoice)
+                    Spacer(Modifier.width(12.dp))
+                }
                 OutlinedTextField(
                     value = query, onValueChange = onQuery, singleLine = true,
                     placeholder = { Text("Movie title, e.g. Aavesham") },
@@ -81,10 +87,6 @@ fun SearchPage(
                     modifier = Modifier.widthIn(max = 640.dp).weight(1f, fill = false).focusRequester(fieldFocus),
                     colors = fieldColors()
                 )
-                if (onVoice != null) {
-                    Spacer(Modifier.width(12.dp))
-                    PillButton("Speak", icon = MicIcon, onClick = onVoice)
-                }
             }
             Spacer(Modifier.height(18.dp))
             Text(

@@ -39,12 +39,13 @@ class MainActivity : ComponentActivity() {
         }
         services.listen = { onText ->
             heard = onText
+            val ask = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH)
+                .putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_WEB_SEARCH)
+                .putExtra(RecognizerIntent.EXTRA_PROMPT, "Say a movie title")
+            // A TV can have two listeners, and Android then asks which one every time: use Google's own directly.
+            VOICE_APPS.firstOrNull { pkg -> Intent(ask).setPackage(pkg).resolveActivity(packageManager) != null }?.let { ask.setPackage(it) }
             try {
-                listen.launch(
-                    Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH)
-                        .putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_WEB_SEARCH)
-                        .putExtra(RecognizerIntent.EXTRA_PROMPT, "Say a movie title")
-                )
+                listen.launch(ask)
                 true
             } catch (_: ActivityNotFoundException) { heard = null; false }
         }
@@ -61,6 +62,9 @@ class MainActivity : ComponentActivity() {
         }
     }
 }
+
+/** Voice input, in order of preference: Speech Recognition and Synthesis from Google, then Google TV's own. */
+private val VOICE_APPS = listOf("com.google.android.tts", "com.google.android.katniss", "com.google.android.googlequicksearchbox")
 
 private class AndroidServices(private val context: Context) : PlatformServices {
     override val isTv: Boolean =

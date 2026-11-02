@@ -222,6 +222,8 @@ fun PillButton(
     light: Boolean = false,
     selected: Boolean = false,
     compact: Boolean = false,
+    /** Read out for an icon-only button (empty [text]). */
+    description: String? = null,
     onClick: () -> Unit,
 ) {
     val (interaction, focused, hovered) = rememberCardInteraction()
@@ -249,6 +251,10 @@ fun PillButton(
             .padding(horizontal = if (compact) 14.dp else 20.dp, vertical = if (compact) 8.dp else 11.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
+        if (icon != null && text.isEmpty()) {   // icon only: a round button
+            Icon(icon, description, tint = content, modifier = Modifier.size(22.dp))
+            return@Row
+        }
         if (icon != null) {
             Icon(icon, null, tint = content, modifier = Modifier.size(if (compact) 16.dp else 18.dp))
             Spacer(Modifier.width(8.dp))

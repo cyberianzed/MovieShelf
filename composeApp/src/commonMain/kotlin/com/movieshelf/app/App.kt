@@ -157,7 +157,8 @@ fun MovieShelfApp(services: PlatformServices, backBridge: BackBridge = remember 
 
     LaunchedEffect(contentWantsFocus, page) {
         if (!contentWantsFocus) return@LaunchedEffect
-        repeat(20) {
+        // Up to ~6 s: a page still loading has nothing to focus at first, and giving up left the sidebar open.
+        repeat(120) {
             withFrameNanos { }
             try { contentFocus.requestFocus() } catch (_: IllegalStateException) { }
             if (contentHasFocus) { contentWantsFocus = false; return@LaunchedEffect }
