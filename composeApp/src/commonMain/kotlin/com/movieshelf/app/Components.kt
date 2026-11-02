@@ -80,7 +80,7 @@ fun PosterCard(movie: Movie, marks: Marks, onClick: () -> Unit, modifier: Modifi
                 .background(Brush.linearGradient(listOf(Color(0xFF2A3A52), Color(0xFF151B24))))
                 .border(
                     when {
-                        focused -> BorderStroke(3.dp, Palette.Accent)   // the brand's mint, only on the focused poster
+                        focused -> BorderStroke(3.dp, Palette.Focus)
                         movie.isGood -> BorderStroke(2.dp, Palette.Good.copy(alpha = 0.75f))
                         else -> BorderStroke(1.dp, Color.White.copy(alpha = 0.06f))
                     },
