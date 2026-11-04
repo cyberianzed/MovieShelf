@@ -17,13 +17,15 @@ class Prefs(private val services: PlatformServices) {
     fun loadFilter(): BrowseFilter = BrowseFilter(
         group = GroupMode.entries.firstOrNull { it.name == services.readSetting("group") } ?: GroupMode.MONTH,
         sort = SortMode.entries.firstOrNull { it.name == services.readSetting("sort") } ?: SortMode.LATEST,
-        year = services.readSetting("year").toIntOrNull()
+        year = services.readSetting("year").toIntOrNull(),
+        genre = Genre.entries.firstOrNull { it.name == services.readSetting("genre") }
     )
 
     fun saveFilter(filter: BrowseFilter) {
         services.saveSetting("group", filter.group.name)
         services.saveSetting("sort", filter.sort.name)
         services.saveSetting("year", filter.year?.toString() ?: "all")
+        services.saveSetting("genre", filter.genre?.name ?: "all")
     }
 
     /** Minimum vote count used by Top rated so 1-vote films don't dominate. */

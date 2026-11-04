@@ -33,7 +33,7 @@ class DemoCatalog(private val today: Today) {
     fun discover(sort: SortMode, section: BrowseSection, page: Int, options: Options): MoviePage =
         movies.matching(section, today, options.languages).sortedFor(sort, options.minVotes).pageOf(page)
 
-    fun featured(options: Options): List<Movie> = movies.matching(BrowseSection("recent", "", null), today, options.languages)
+    fun featured(options: Options, genre: Genre? = null): List<Movie> = movies.matching(BrowseSection("recent", "", null, genre = genre), today, options.languages)
         .filter { (today.epoch - (parseIsoEpoch(it.releaseDate) ?: 0)) <= 150 }
         .sortedByDescending { it.popularity }.take(6)
 

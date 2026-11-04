@@ -121,17 +121,26 @@ enum class SortMode(val label: String, val apiValue: String) {
     VOTES("Most votes", "vote_count.desc")
 }
 
+/** The genre filter's choices. [ids] go to TMDB's with_genres; a comma means all of them (Crime thriller = Crime and Thriller). */
+enum class Genre(val label: String, val ids: List<Int>) {
+    ACTION("Action", listOf(28)), COMEDY("Comedy", listOf(35)), DRAMA("Drama", listOf(18)),
+    THRILLER("Thriller", listOf(53)), CRIME_THRILLER("Crime thriller", listOf(80, 53)),
+    ROMANCE("Romance", listOf(10749)), HORROR("Horror", listOf(27)), FANTASY("Fantasy", listOf(14))
+}
+
 data class BrowseFilter(
     val group: GroupMode = GroupMode.MONTH,
     val sort: SortMode = SortMode.LATEST,
-    val year: Int? = null
+    val year: Int? = null,
+    val genre: Genre? = null
 )
 
 data class BrowseSection(
     val id: String,
     val heading: String,
     val year: Int? = null,
-    val month: Int? = null
+    val month: Int? = null,
+    val genre: Genre? = null
 )
 
 val monthNames = listOf("January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December")
@@ -209,15 +218,23 @@ fun monthSections(filter: BrowseFilter, today: Today, count: Int): List<BrowseSe
         (0 until count).map { offset -> (start - offset).let { it / 12 to it % 12 + 1 } }
             .filter { it.first >= OLDEST_YEAR }
     }
-    return months.map { (y, m) -> BrowseSection("m-$y-$m", "${monthNames[m - 1]} $y", y, m) }
+    return months.map { (y, m) -> BrowseSection("m-$y-$m${filter.genreKey}", "${monthNames[m - 1]} $y", y, m, filter.genre) }
 }
 
 fun yearSections(filter: BrowseFilter, today: Today): List<BrowseSection> =
     (filter.year?.let { listOf(it) } ?: (today.year downTo OLDEST_YEAR).toList())
-        .map { BrowseSection("y-$it", "$it", it) }
+        .map { BrowseSection("y-$it${filter.genreKey}", "$it", it, genre = filter.genre) }
 
-fun allSection(filter: BrowseFilter): BrowseSection =
-    BrowseSection("all-${filter.year ?: "any"}", if (filter.year == null) "All Malayalam movies" else "Malayalam movies of ${filter.year}", filter.year)
+fun allSection(filter: BrowseFilter): BrowseSection {
+    val kind = filter.genre?.let { "${it.label.lowercase()} " } ?: ""
+    return BrowseSection(
+        "all-${filter.year ?: "any"}${filter.genreKey}",
+        if (filter.year == null) "All Malayalam ${kind}movies" else "Malayalam ${kind}movies of ${filter.year}", filter.year, genre = filter.genre
+    )
+}
+
+/** Keeps a genre's sections apart from the unfiltered ones (their ids key the loaded pages). */
+private val BrowseFilter.genreKey: String get() = genre?.let { "-${it.name}" } ?: ""
 
 /**
  * Inclusive ISO date range for a section. The upper bound never passes today, so upcoming
@@ -247,13 +264,17 @@ fun discoverParams(sort: SortMode, section: BrowseSection, today: Today, page: I
         add("page" to page.toString())
         if (from != null) add("primary_release_date.gte" to from)
         add("primary_release_date.lte" to to)
+        section.genre?.let { add("with_genres" to it.ids.joinToString(",")) }
     }
 }
 
 /** Client-side equivalent of the discover query, used by demo mode and tests. */
 fun List<Movie>.matching(section: BrowseSection, today: Today, languages: Set<String> = setOf("ml")): List<Movie> {
     val (from, to) = dateRange(section, today)
-    return filter { it.originalLanguage in languages && it.releaseDate.length >= 10 && (from == null || it.releaseDate >= from) && it.releaseDate <= to }
+    return filter {
+        it.originalLanguage in languages && it.releaseDate.length >= 10 && (from == null || it.releaseDate >= from) && it.releaseDate <= to &&
+            (section.genre == null || it.genreIds.containsAll(section.genre.ids))
+    }
 }
 
 fun List<Movie>.sortedFor(sort: SortMode, minVotes: Int = 0): List<Movie> = when (sort) {

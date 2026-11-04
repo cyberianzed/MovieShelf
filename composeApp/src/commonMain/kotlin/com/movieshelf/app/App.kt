@@ -63,20 +63,20 @@ fun MovieShelfApp(services: PlatformServices, backBridge: BackBridge = remember 
     var contentWantsFocus by remember { mutableStateOf(services.isTv) }
     var panelWantsFocus by remember { mutableStateOf(false) }
     // A top-strip chip that opened the choice panel: picking or leaving returns focus to it, not to the banner.
-    val chipFocus = remember { listOf(Menu.GROUP, Menu.YEAR, Menu.SORT).associateWith { FocusRequester() } }
+    val chipFocus = remember { listOf(Menu.GROUP, Menu.YEAR, Menu.GENRE, Menu.SORT).associateWith { FocusRequester() } }
     var chipReturn by remember { mutableStateOf<Menu?>(null) }
     var chipWantsFocus by remember { mutableStateOf<Menu?>(null) }
     var searchWantsFocus by remember { mutableStateOf(false) }
     val focusManager = LocalFocusManager.current
 
     // Browse state survives page switches and the details dialog.
-    val monthList = remember(filter.group, filter.year) { LazyListState() }
-    val feedGrid = remember(filter.group, filter.year) { LazyGridState() }
+    val monthList = remember(filter.group, filter.year, filter.genre) { LazyListState() }
+    val feedGrid = remember(filter.group, filter.year, filter.genre) { LazyGridState() }
     /** Yearly view: the year the list starts from (a year chip restarts the list there). */
-    var yearStart by remember(filter.group, filter.year) { mutableStateOf<Int?>(null) }
+    var yearStart by remember(filter.group, filter.year, filter.genre) { mutableStateOf<Int?>(null) }
     // Every month back to 1950 exists from the start (rows are only built when scrolled into view), so the list
     // never changes size while scrolling. Adding months mid-scroll crashed Compose's list layout.
-    val sections = remember(filter.group, filter.year) { monthSections(filter, today, (today.year - OLDEST_YEAR + 1) * 12) }
+    val sections = remember(filter.group, filter.year, filter.genre) { monthSections(filter, today, (today.year - OLDEST_YEAR + 1) * 12) }
     var refreshTick by remember { mutableIntStateOf(0) }
     val scope = rememberCoroutineScope()
     val store = remember(filter, options, refreshTick) {
@@ -97,11 +97,11 @@ fun MovieShelfApp(services: PlatformServices, backBridge: BackBridge = remember 
     }
     var featured by remember { mutableStateOf<List<Movie>>(emptyList()) }
     var featuredFailed by remember { mutableStateOf(false) }
-    LaunchedEffect(options, filter.year, refreshTick) {
+    LaunchedEffect(options, filter.year, filter.genre, refreshTick) {
         featuredFailed = false
         // A flaky connection shouldn't leave the top of the home page empty: retry a few times, then offer Try again.
         for (attempt in 0 until 3) {
-            try { featured = repository.featured(options, filter.year); return@LaunchedEffect }
+            try { featured = repository.featured(options, filter.year, filter.genre); return@LaunchedEffect }
             catch (e: Exception) { if (e is kotlinx.coroutines.CancellationException) throw e; delay(1500L * (attempt + 1)) }
         }
         featuredFailed = true

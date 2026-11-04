@@ -55,7 +55,7 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
 
 /**
- * The one control strip under the spotlight: search, Group / Year / Sort dropdowns, then quick-jump
+ * The one control strip under the spotlight: search, Group / Year / Genre / Sort dropdowns, then quick-jump
  * tabs (months in Monthly, years in Yearly) that fill the rest of the same row.
  */
 @Composable
@@ -86,6 +86,8 @@ fun ControlStrip(
             listOf("All years" to filter.copy(year = null)) + (today.year downTo OLDEST_YEAR).map { "$it" to filter.copy(year = it) },
             filter, onPick, chipFocus[Menu.YEAR]
         ) { onOpenPanel?.invoke(Menu.YEAR) ?: false }
+        Spacer(Modifier.width(8.dp))
+        Dropdown(filter.genre?.label ?: "All genres", genreChoices(filter), filter, onPick, chipFocus[Menu.GENRE]) { onOpenPanel?.invoke(Menu.GENRE) ?: false }
         Spacer(Modifier.width(8.dp))
         Dropdown(filter.sort.label, SortMode.entries.map { it.label to filter.copy(sort = it) }, filter, onPick, chipFocus[Menu.SORT]) { onOpenPanel?.invoke(Menu.SORT) ?: false }
         if (demo) { Spacer(Modifier.width(10.dp)); Tag("DEMO", color = Color(0xFF7C5CFF)) }

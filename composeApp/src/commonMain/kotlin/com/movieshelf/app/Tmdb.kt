@@ -141,13 +141,13 @@ class MovieRepository(private val services: PlatformServices, private val today:
     }
 
     /** Recent popular releases with backdrops for the rotating spotlight (or the chosen year's). */
-    suspend fun featured(options: Options, year: Int?): List<Movie> {
-        if (options.token.isBlank()) return demo.featured(options).filter { it.passes(options) }
+    suspend fun featured(options: Options, year: Int?, genre: Genre? = null): List<Movie> {
+        if (options.token.isBlank()) return demo.featured(options, genre).filter { it.passes(options) }
         val (from, to) = if (year == null) today.minusDays(150) to today.iso else dateRange(BrowseSection("y", "", year), today)
         val params = listOfNotNull(
             "with_original_language" to options.languageParam, "include_adult" to "false", "language" to "en-US",
             "sort_by" to "popularity.desc", from?.let { "primary_release_date.gte" to it },
-            "primary_release_date.lte" to to, "page" to "1"
+            "primary_release_date.lte" to to, "page" to "1", genre?.let { "with_genres" to it.ids.joinToString(",") }
         )
         val candidates = json.decodeFromString<PageDto>(get("/discover/movie", params, options.token)).results
             .filter { it.originalLanguage in options.languages && it.backdropPath != null }.take(12)

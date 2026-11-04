@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+
+- **Genre filter:** a Genre chip next to Year (and Genre in the sidebar): Action, Comedy, Drama, Thriller, Crime thriller (films that are both), Romance, Horror and Fantasy. It works with every grouping, sort and year, the spotlight follows it, and it's remembered.
+
 ## Padampetti 1.0.0 (2026-11-03), formerly MovieShelf 1.4.1
 
 - **MovieShelf is now Padampetti** (പടംപെട്ടി, "movie box"): the name on the TV, in the Windows window and Start menu, and the installer.

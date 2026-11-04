@@ -22,6 +22,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.DateRange
+import androidx.compose.material.icons.filled.Face
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Menu
@@ -55,7 +56,7 @@ enum class Page { BROWSE, SEARCH, WATCHLIST, SETTINGS }
 
 enum class Menu(val label: String, val page: Page?) {
     HOME("Home", Page.BROWSE), SEARCH("Search", Page.SEARCH), GROUP("Group", null), YEAR("Year", null),
-    SORT("Sort", null), WATCHLIST("Watchlist", Page.WATCHLIST), SETTINGS("Settings", Page.SETTINGS);
+    GENRE("Genre", null), SORT("Sort", null), WATCHLIST("Watchlist", Page.WATCHLIST), SETTINGS("Settings", Page.SETTINGS);
     val isFilter: Boolean get() = page == null
 }
 
@@ -176,6 +177,7 @@ private fun RailItem(menu: Menu, expanded: Boolean, active: Boolean, modifier: M
             Menu.SEARCH -> Icon(Icons.Default.Search, menu.label, tint = tint, modifier = Modifier.size(22.dp))
             Menu.GROUP -> Icon(Icons.Default.Menu, menu.label, tint = tint, modifier = Modifier.size(22.dp))
             Menu.YEAR -> Icon(Icons.Default.DateRange, menu.label, tint = tint, modifier = Modifier.size(22.dp))
+            Menu.GENRE -> Icon(Icons.Default.Face, menu.label, tint = tint, modifier = Modifier.size(22.dp))
             Menu.SORT -> SortIcon(tint, description = menu.label)
             Menu.WATCHLIST -> Icon(Icons.Default.Favorite, menu.label, tint = tint, modifier = Modifier.size(22.dp))
             Menu.SETTINGS -> Icon(Icons.Default.Settings, menu.label, tint = tint, modifier = Modifier.size(22.dp))
@@ -194,11 +196,15 @@ fun choicesFor(menu: Menu, filter: BrowseFilter, today: Today): List<Pair<String
     Menu.GROUP -> GroupMode.entries.map { it.label to filter.copy(group = it) }
     Menu.SORT -> SortMode.entries.map { it.label to filter.copy(sort = it) }
     Menu.YEAR -> listOf("All years" to filter.copy(year = null)) + (today.year downTo OLDEST_YEAR).map { "$it" to filter.copy(year = it) }
+    Menu.GENRE -> genreChoices(filter)
     else -> emptyList()
 }
 
+fun genreChoices(filter: BrowseFilter): List<Pair<String, BrowseFilter>> =
+    listOf("All genres" to filter.copy(genre = null)) + Genre.entries.map { it.label to filter.copy(genre = it) }
+
 /**
- * Second level of the sidebar. It appears as soon as Group/Year/Sort is focused; moving through
+ * Second level of the sidebar. It appears as soon as Group/Year/Genre/Sort is focused; moving through
  * it never changes anything, only OK / click commits a choice.
  */
 @Composable

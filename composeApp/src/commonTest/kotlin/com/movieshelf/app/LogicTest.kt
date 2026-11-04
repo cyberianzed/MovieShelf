@@ -56,6 +56,17 @@ class GroupingTest {
         val p = discoverParams(SortMode.LATEST, BrowseSection("a", ""), today, 1, Options(languages = setOf("hi", "ml", "ta"))).toMap()
         assertEquals("ml|ta|hi", p["with_original_language"])
     }
+
+    @Test fun genreGoesToTmdbAndCrimeThrillerNeedsBoth() {
+        val none = discoverParams(SortMode.LATEST, BrowseSection("a", ""), today, 1, Options()).toMap()
+        assertFalse("with_genres" in none)
+        val comedy = monthSections(BrowseFilter(genre = Genre.COMEDY), today, 1).single()
+        assertEquals("35", discoverParams(SortMode.LATEST, comedy, today, 1, Options()).toMap()["with_genres"])
+        assertEquals("80,53", discoverParams(SortMode.LATEST, allSection(BrowseFilter(genre = Genre.CRIME_THRILLER)), today, 1, Options()).toMap()["with_genres"])
+        // A genre's sections are kept apart from the unfiltered ones.
+        assertFalse(comedy.id == monthSections(BrowseFilter(), today, 1).single().id)
+        assertEquals("All Malayalam comedy movies", allSection(BrowseFilter(genre = Genre.COMEDY)).heading)
+    }
 }
 
 class SortingTest {
@@ -91,6 +102,13 @@ class SortingTest {
         val today = Today(2026, 10, 15)
         val movies = listOf(a, b.copy(originalLanguage = "ta"), c.copy(releaseDate = ""), Movie(9, "Future", releaseDate = "2026-11-01"))
         assertEquals(listOf(1), movies.matching(BrowseSection("y", "", 2026), today).map { it.id })
+    }
+
+    @Test fun matchingFiltersGenre() {
+        val today = Today(2026, 10, 15)
+        val movies = listOf(a.copy(genreIds = listOf(80, 53)), b.copy(genreIds = listOf(53)), c.copy(genreIds = listOf(35)))
+        assertEquals(listOf(1), movies.matching(BrowseSection("a", "", genre = Genre.CRIME_THRILLER), today).map { it.id })
+        assertEquals(listOf(1, 2), movies.matching(BrowseSection("a", "", genre = Genre.THRILLER), today).map { it.id }.sorted())
     }
 
     @Test fun missingReleaseDateIsHandled() {
